@@ -1,0 +1,8 @@
+.DS_Store
+_DS_Store
+.idea
+.build
+Article.SwiftUIScrollView.xcodeproj/xcuserdata/*
+Article.SwiftUIScrollView.xcodeproj/xcshareddata/*
+Article.SwiftUIScrollView.xcodeproj/project.xcworkspace/xcuserdata/*
+Article.SwiftUIScrollView.xcodeproj/project.xcworkspace/xcshareddata/*
