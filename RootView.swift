@@ -11,24 +11,13 @@ import OSLog
 import SDWebImageSwiftUI
 import SFSafeSymbols
 
-struct ScrollOffsetPreferenceKey: PreferenceKey {
-
-    static var defaultValue: CGFloat = 0
-
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
-    }
-
-}
-
 struct RootView: View {
     
-    @State private var scrollOffset = CGFloat(0)
     @State private var rate: Decimal? = 3.8
     
     // MARK: - Vars
     
-    private var scrolledEnoughToShowTopBar: Bool {
+    private func scrolledEnoughToShowTopBar(scrollOffset: CGFloat) -> Bool {
         -scrollOffset > -90
     }
     
@@ -36,14 +25,13 @@ struct RootView: View {
         UIApplication.shared.safeAreaInsets.top + 42
     }
 
-    private var topBackgroundOffset: CGFloat {
-        let bounds = UIScreen.main.bounds
-        return scrollOffset / 10 - bounds.height / 8
+    private func topBackgroundOffset(scrollOffset: CGFloat) -> CGFloat {
+        min(-scrollOffset, -scrollOffset * 0.9 - topBarHeight)
     }
 
-    private var topImageOffset: CGFloat {
+    private func topImageOffset(scrollOffset: CGFloat) -> CGFloat {
         let bounds = UIScreen.main.bounds
-        return scrollOffset / 5 - bounds.height / 20
+        return -scrollOffset * 0.8 - bounds.height / 20
     }
 
     // MARK: - UI
@@ -58,16 +46,12 @@ struct RootView: View {
                 .aspectRatio(contentMode: .fill)
                 .clipped()
 
-            Group {
-                topBackgroundBody
-                EntryInfoView(imageOffset: topImageOffset)
-                scrollBody.padding(.top, -200)
-            }
+            scrollBody.padding(.top, -200)
         }
         .ignoresSafeArea(.all, edges: [.top, .bottom])
     }
 
-    private var topBackgroundBody: some View {
+    private func topBackgroundBody(offset: CGFloat) -> some View {
         AnimatedImage(url: URL(string: "https://images.pexels.com/photos/10288317/pexels-photo-10288317.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"))
             .resizable()
             .aspectRatio(contentMode: .fill)
@@ -75,7 +59,7 @@ struct RootView: View {
                    height: UIScreen.main.bounds.height / 1.5)
             .aspectRatio(contentMode: .fill)
             .clipped()
-            .offset(y: topBackgroundOffset)
+            .offset(y: topBackgroundOffset(scrollOffset: offset))
     }
 
     @ViewBuilder
@@ -86,21 +70,19 @@ struct RootView: View {
                 Color.clear
                     .frame(width: size.width, height: size.height - 40)
                 ZStack(alignment: .top) {
-                    scrollContentBody
-
                     GeometryReader { proxy in
                         let offset = proxy.frame(in: .named("scroll")).minY
                         Text("\(offset)")
-                        Color.clear.preference(key: ScrollOffsetPreferenceKey.self, value: offset)
+                        topBackgroundBody(offset: offset)
+                        EntryInfoView(imageOffset: topImageOffset(scrollOffset: offset))
                     }
+
+                    scrollContentBody
                 }
                 Color.clear
                     .frame(width: size.width,
                            height: UIApplication.shared.safeAreaInsets.bottom)
             }
-        }
-        .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
-            scrollOffset = value
         }
     }
     
