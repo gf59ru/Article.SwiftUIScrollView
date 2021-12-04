@@ -108,11 +108,23 @@ struct RootView: View {
         LazyVStack(spacing: 0) {
             EntryScrollHeader()
 
-            Color.green.opacity(0.5)
-                .frame(height: 200)
-
-            Color.red.opacity(0.5)
-            .frame(height: 1000)
+            ZStack {
+                VStack(spacing: 0) {
+                    hugeSeparator
+                    separator
+                    hugeSeparator
+                    RateView(rate: $rate, swipeEnabled: true)
+                    hugeSeparator
+                    EntryItemPairingView()
+                    EntryAboutView()
+                }
+            }
+            VStack(spacing: 0) {
+                EntryNotesView()
+                EntryMapView()
+                EntryBestItemsView()
+                EntryLatestCommentsView()
+            }
         }
     }
 
